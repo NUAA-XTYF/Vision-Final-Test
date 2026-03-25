@@ -1,0 +1,51 @@
+name: Build Status
+
+on:
+  push:
+    branches: [ "master", "main" ]
+  pull_request:
+    branches: [ "master", "main" ]
+
+jobs:
+  build:
+    name: Build ${{ matrix.target }}
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false  # Ensure one failure doesn't cancel other jobs
+      matrix:
+        target: [standard_gcy, standard_hjy, standard_wwj, standard_yx]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential cmake
+        sudo apt-get install -y libopencv-dev libfmt-dev libspdlog-dev libyaml-cpp-dev nlohmann-json3-dev libeigen3-dev
+
+    # Note: OpenVINO is required by CMakeLists.txt.
+    # The standard ubuntu-22.04 runner does not include OpenVINO.
+    # This step attempts to install minimal runtime or relies on a container if configured.
+    # For a robust setup, consider using a container: 'image: openvino/ubuntu22_dev:latest'
+    
+    # Attempting to fetch OpenVINO GPG key and repo (Example for 22.04)
+    - name: Install OpenVINO (Optional/Time-consuming)
+      continue-on-error: true
+      run: |
+        wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
+        sudo apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
+        echo "deb https://apt.repos.intel.com/openvino/2024 ubuntu22 main" | sudo tee /etc/apt/sources.list.d/intel-openvino-2024.list
+        sudo apt-get update
+        sudo apt-get install -y openvino-2024.0.0
+        # Source the setupvars for current shell session only (won't persist to next steps easily without $GITHUB_ENV)
+        source /opt/intel/openvino_2024.0.0/setupvars.sh
+        echo "OpenVINO_DIR=/opt/intel/openvino_2024.0.0/runtime/cmake" >> $GITHUB_ENV
+
+    - name: Configure CMake
+      # Using a generic path or the one set by environment
+      run: |
+        cmake -B build -DCMAKE_BUILD_TYPE=Release -DOpenVINO_DIR=${{ env.OpenVINO_DIR }}
+
+    - name: Build Target
+      run: cmake --build build --target ${{ matrix.target }} --parallel
