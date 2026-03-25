@@ -173,7 +173,8 @@ void CBoardUART::read_thread()
         // Verify CRC
         uint16_t cal_crc = tools::get_crc16(buffer, PACKET_SIZE - 2);
         tools::logger()->debug(
-          "[CBoardUART] Received packet yaw {:.4f}, pitch {:.4f}, Calculated CRC: {:04X}, "
+          "[CBoardUART] Received packet yaw {:.4f}, pitch {:.4f}, Calculated CRC: "
+          "{:04X}, "
           "Recived "
           "CRC: {:04X}, CRC Passed: {}",
           (float)(pkt->yaw) * 57.3, (float)(pkt->pitch) * 57.3, cal_crc, (uint16_t)(pkt->crc16),
