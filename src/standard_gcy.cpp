@@ -8,7 +8,7 @@
 #include "io/camera.hpp"
 #include "io/dm_imu/dm_imu.hpp"
 #include "io/cboard_uart.hpp"
-#include "io/gimbal.hpp"
+#include "io/gimbal/gimbal.hpp"
 #include "io/command.hpp"
 
 #include "tasks/auto_aim/multithread/commandgener.hpp"
