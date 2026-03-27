@@ -32,8 +32,9 @@ int main() {
 
   tools::Exiter exiter;
   tools::Plotter plotter;
-  
+
   io::Gimbal gimbal(config_path);
+  
   io::Camera camera(config_path);  
   io::CBoardUART cboard(config_path);
   
@@ -58,14 +59,10 @@ int main() {
     q = cboard.imu_at(t - 1ms);
     mode = cboard.mode;
 
-    if (last_mode != mode) {
-      tools::logger()->info()("Switch to {}",io::MODES[mode])
-      last_mode = mode;
-    }
-
+    
     solver.set_R_gimbal2world(q);
 
-    Eigen::Vector3d final_xyz = tools::eulers(Solver::R_gimbal2world(), 2, 1, 0);
+    Eigen::Vector3d final_xyz = tools::eulers(solver.R_gimbal2world(), 2, 1, 0);
 
     auto armors = yolo.detect(img);
 
@@ -83,3 +80,7 @@ int main() {
     
    return 0;
 }
+   
+
+    
+ 
