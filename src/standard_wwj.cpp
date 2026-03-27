@@ -45,14 +45,14 @@ int main(int argc, char * argv[]) {
     std::chrono::steady_clock::time_point t;
     auto mode = io::Mode::idle;
     auto last_mode = io::Mode::idle;
-    while(!exiter())
+    while(!exiter.exit())
     {
         camera.read(img,t);
         q=cboard.imu_at(t);
         mode=cboard.mode;
         if(mode!=last_mode) last_mode=mode;
         solver.set_R_gimbal2world(q);
-        Eigen::Vector3d finalxyzw=tools::eulers(solver.set_R_gimbal2world(q),0,1,2);
+        Eigen::Vector3d finalxyzw=tools::eulers(solver.R_gimbal2world(),0,1,2);
         auto armors=detector.detect(img);
         auto targets=tracker.track(armors,t);
         auto cmd=aimer.aim(targets,t,cboard.bullet_speed);
