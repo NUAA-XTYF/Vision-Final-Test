@@ -35,6 +35,7 @@ int main(int argc, char * argv[]) {
     tools::Recorder recoder;
     io::CBoard cboard(config_path);
     io::Camera camera(config_path);
+    io::Gimbal gimbal(config_path);
     auto_aim::YOLO detector(config_path,false);
     auto_aim::Solver solver(config_path);
     auto_aim::Tracker tracker(config_path,solver);
