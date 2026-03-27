@@ -1,7 +1,85 @@
 #include <iostream>
-#include "fmt/format.h"
+#include "fmt/format"
+
+#include <chrono>
+#include <opencv2/opencv.hpp>
+#include <thread>
+
+#include "io/camera_uart.hpp"
+#include "io/dm_imu/dm_imu.hpp"
+#include "tasks/auto_aim/aimer.hpp"
+#include "tasks/auto_aim/multithread/commandgener.hpp"
+#include "tasks/auto_aim/multithread/mt_detector.hpp"
+#include "tasks/auto_aim/shooter.hpp"
+#include "tasks/auto_aim/solver.hpp"
+#include "tasks/auto_aim/tracker.hpp"
+#include "tasks/auto_buff/buff_aimer.hpp"
+#include "tasks/auto_buff/buff_detector.hpp"
+#include "tasks/auto_buff/buff_solver.hpp"
+#include "tasks/auto_buff/buff_target.hpp"
+#include "tasks/auto_buff/buff_type.hpp"
+#include "tools/exiter.hpp"
+#include "tools/img_tools.hpp"
+#include "tools/logger.hpp"
+#include "tools/math_tools.hpp"
+#include "tools/plotter.hpp"
+#include "tools/recorder.hpp"
+
+
 
 int main() {
-    fmt::print("Hello from standard_gcy inside Dev Container!\n");
-    return 0;
+  fmt::print("Hello from standard_gcy inside Dev Container!\n");
+
+  tools::Exiter exiter;
+  tools::Plotter plotter;
+  
+  io::Gimbal gimbal(config_path);
+  io::Camera camera(config_path);  
+  io::CBoardUART cboard(config_path);
+  
+  auto_aim::YOLO yolo(config_path, true);
+  auto_aim::Solver solver(config_path);
+  auto_aim::Tracker tracker(config_path, solver);
+  auto_aim::Shooter shooter(config_path);
+  auto_aim::Aimer aimer(config_path);
+
+
+  
+  cv::Mat img;  
+  Eigen::Quaterniond q; 
+  std::chrono::steady_clock::time_point t;
+  
+
+  auto mode = io::Mode::idle;   
+  auto last_mode = io::Mode::idle;  
+
+  while(!exiter.exit()){
+    camera.read(img,t);
+    q = cboard.imu_at(t - 1ms);
+    mode = cboard.mode;
+
+    if (last_mode != mode) {
+      tools::loggeer()->info()("Switch to {}",io::MODES[mode])
+      last_mode = mode;
+    }
+
+    solver.set_R_gimbal2world(q);
+
+    Eigen::Vector3d final_xyz = tools::euler(solver.set_R_gimbal2world(), 2, 1, 0);
+
+    auto armors = yolo.detect(img);
+
+    auto targets = tracker.track(armors, t);
+
+    auto cmd = aimer.aim(targets, t, cboard.bullet_speed);
+
+    gimbal.send(cmd);
+
+   
+
+    
+  }
+
+    
+   return 0;
 }
