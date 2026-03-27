@@ -1,23 +1,23 @@
 #include <iostream>
-#include "fmt/format"
+#include "fmt/format.h"
 
 #include <chrono>
 #include <opencv2/opencv.hpp>
 #include <thread>
 
-#include "io/camera_uart.hpp"
+#include "io/camera.hpp"
 #include "io/dm_imu/dm_imu.hpp"
-#include "tasks/auto_aim/aimer.hpp"
+#include "io/cboard_uart.hpp"
+#include "io/gimbal.hpp"
+#include "io/command.hpp"
+
 #include "tasks/auto_aim/multithread/commandgener.hpp"
-#include "tasks/auto_aim/multithread/mt_detector.hpp"
+#include "tasks/auto_aim/aimer.hpp"
 #include "tasks/auto_aim/shooter.hpp"
 #include "tasks/auto_aim/solver.hpp"
 #include "tasks/auto_aim/tracker.hpp"
-#include "tasks/auto_buff/buff_aimer.hpp"
-#include "tasks/auto_buff/buff_detector.hpp"
-#include "tasks/auto_buff/buff_solver.hpp"
-#include "tasks/auto_buff/buff_target.hpp"
-#include "tasks/auto_buff/buff_type.hpp"
+#include "tasks/auto_aim/yolo.hpp"
+
 #include "tools/exiter.hpp"
 #include "tools/img_tools.hpp"
 #include "tools/logger.hpp"
