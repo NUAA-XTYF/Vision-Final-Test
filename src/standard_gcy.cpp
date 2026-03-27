@@ -59,13 +59,13 @@ int main() {
     mode = cboard.mode;
 
     if (last_mode != mode) {
-      tools::loggeer()->info()("Switch to {}",io::MODES[mode])
+      tools::logger()->info()("Switch to {}",io::MODES[mode])
       last_mode = mode;
     }
 
     solver.set_R_gimbal2world(q);
 
-    Eigen::Vector3d final_xyz = tools::euler(solver.set_R_gimbal2world(), 2, 1, 0);
+    Eigen::Vector3d final_xyz = tools::eulers(Solver::R_gimbal2world(), 2, 1, 0);
 
     auto armors = yolo.detect(img);
 
