@@ -2,7 +2,7 @@
 #include<chrono>
 #include<opencv2/opencv.hpp>
 
-#include<io/cemera.hpp>
+#include<io/camera.hpp>
 #include<io/cboard.hpp>
 #include<io/gimbal/gimbal.hpp>
 #include<tasks/auto_aim/armor.hpp>
